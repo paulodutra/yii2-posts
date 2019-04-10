@@ -1,9 +1,31 @@
 <?php
-/* @var $this yii\web\View */
+    use yii\helpers\Url;
+    /* @var $this yii\web\View */
 ?>
-<h1>clients/index</h1>
+<h1 class="text text-center">Clientes</h1>
 
-<p>
-    You may change the content of this page by modifying
-    the file <code><?= __FILE__; ?></code>.
-</p>
+<a href="<?= Url::to(['clients/create']);?>" class="btn btn-success">Novo Cliente</a>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Nome</th>
+        <th>Email</th>
+        <th>-</th>
+    </tr>
+    </thead>
+    <tbody>
+        <?php foreach($clients as $client): ?>
+            <tr>
+                <td><?= $client->id; ?></td>
+                <td><?= $client->name; ?></td>
+                <td><?= $client->email; ?></td>
+                <td>
+                    <a href="<?= Url::to(['clients/update', 'id' => $client->id]);?>">Editar</a> |
+                    <a href="<?= Url::to(['clients/delete', 'id' => $client->id]);?>">Excluir</a>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>

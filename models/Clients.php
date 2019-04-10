@@ -24,6 +24,7 @@ class Clients extends ActiveRecord
      {
          //informa que os dados podem ser gravados ao utilizar o   $model->attributes no controller
          return [
+            [['name', 'email'], 'safe'],
             [['name', 'email'], 'required'],
             [['name', 'email'], 'string', 'max' => 255], 
          ];
