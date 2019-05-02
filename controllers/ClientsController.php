@@ -2,103 +2,126 @@
 
 namespace app\controllers;
 
+use Yii;
 use app\models\Clients;
+use app\models\ClientsSearch;
+use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\filters\VerbFilter;
 
-class ClientsController extends \yii\web\Controller
+/**
+ * ClientsController implements the CRUD actions for Clients model.
+ */
+class ClientsController extends Controller
 {
-
-     /**
-     * <b>actionIndex</b> Método responsável por realizar a listagem dos clientes
+    /**
+     * {@inheritdoc}
      */
+    public function behaviors()
+    {
+        return [
+            'verbs' => [
+                'class' => VerbFilter::className(),
+                'actions' => [
+                    'delete' => ['POST'],
+                ],
+            ],
+        ];
+    }
 
+    /**
+     * Lists all Clients models.
+     * @return mixed
+     */
     public function actionIndex()
     {
-        $clients = Clients::find()->all();
+        $searchModel = new ClientsSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-            'clients' => $clients
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
+    /**
+     * Displays a single Clients model.
+     * @param integer $id
+     * @return mixed
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    public function actionView($id)
+    {
+        return $this->render('view', [
+            'model' => $this->findModel($id),
+        ]);
+    }
 
     /**
-     * <b>actionCreate</b> Método responsável por realizar a criação de um novo cliente.
-     * OBS: Para utilizar $model->attributes, deverá estar habilitado no model dentro do metodo rules os nomes do campo com o valor safe
+     * Creates a new Clients model.
+     * If creation is successful, the browser will be redirected to the 'view' page.
+     * @return mixed
      */
     public function actionCreate()
     {
-        $request = \yii::$app->request;
+        $model = new Clients();
 
-        if($request->isPost)
-        {
-           $model = new Clients();
-
-           //attributes é uma propriedade do active record ao passar $request->post() sem parametro exemplo $request->post('email') nem nada ele irá pegar todos os dados do post
-           $model->attributes =  $request->post(); 
-           //só grava se o metodo rules existir no modelo
-           $model->save();           
-           return $this->redirect(['clients/index']);
-
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->id]);
         }
 
-        return $this->render('create');
-    }
-
-
-      /**
-     * <b>actionUpdate</b> Método responsável em realizar a atualização do cliente, recebe o id como parametro (antes disso devera registrar a 
-     * personalização de rota no arquivo config/web.php) dentro do array rules
-     */
-    public function actionUpdate($id)
-    {
-        $model = Clients::findOne($id);
-
-        if(! $model)
-        {
-            throw new NotFoundHttpException("Página não encontrada");
-        }
-
-        $request = \yii::$app->request;
-        
-        if($request->isPost)
-        {
-           //attributes é uma propriedade do active record ao passar $request->post() sem parametro exemplo $request->post('email') nem nada ele irá pegar todos os dados do post
-           $model->attributes =  $request->post(); 
-           //irá identificar que o registro já existe
-           $model->save();
-           
-           return $this->redirect(['clients/index']);
-
-        }
-
-        return $this->render('update', [
-            'model' => $model
+        return $this->render('create', [
+            'model' => $model,
         ]);
     }
 
+    /**
+     * Updates an existing Clients model.
+     * If update is successful, the browser will be redirected to the 'view' page.
+     * @param integer $id
+     * @return mixed
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    public function actionUpdate($id)
+    {
+        $model = $this->findModel($id);
 
-     /**
-     * <b>actionDelete<b/> Método responsável por excluir um registro, recebe como parametro o id do mesmo como parametro. (antes disso devera registrar a 
-     * personalização de rota no arquivo config/web.php) dentro do array rules 
-     * 
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+
+        return $this->render('update', [
+            'model' => $model,
+        ]);
+    }
+
+    /**
+     * Deletes an existing Clients model.
+     * If deletion is successful, the browser will be redirected to the 'index' page.
+     * @param integer $id
+     * @return mixed
+     * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionDelete($id)
     {
+        $this->findModel($id)->delete();
 
-        $model = Clients::findOne($id);
-
-        if(! $model)
-        {
-            throw new NotFoundHttpException("Página não encontrada");
-        }
-
-        $model->delete();
-        
-        return $this->redirect(['clients/index']);
+        return $this->redirect(['index']);
     }
 
+    /**
+     * Finds the Clients model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     * @param integer $id
+     * @return Clients the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = Clients::findOne($id)) !== null) {
+            return $model;
+        }
 
-
-
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
 }
